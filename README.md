@@ -1,73 +1,164 @@
-# Welcome to your Lovable project
+# jiti
 
-## Project info
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![bundle][bundle-src]][bundle-href]
+[![License][license-src]][license-href]
 
-**URL**: https://lovable.dev/projects/86403247-3786-45e0-b982-a5d959c1b472
+Runtime Typescript and ESM support for Node.js.
 
-## How can I edit this code?
+> [!IMPORTANT]
+> This is the support branch for jiti v1. Check out [jiti/main](https://github.com/unjs/jiti/tree/main) for the latest version and [unjs/jiti#174](https://github.com/unjs/jiti/issues/174) for the roadmap.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- Seamless typescript and ESM syntax support
+- Seamless interoperability between ESM and CommonJS
+- Synchronous API to replace `require`
+- Super slim and zero dependency
+- Smart syntax detection to avoid extra transforms
+- CommonJS cache integration
+- Filesystem transpile hard cache
+- V8 compile cache
+- Custom resolve alias
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/86403247-3786-45e0-b982-a5d959c1b472) and start prompting.
+## Usage
 
-Changes made via Lovable will be committed automatically to this repo.
+### Programmatic
 
-**Use your preferred IDE**
+```js
+const jiti = require("jiti")(__filename);
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+jiti("./path/to/file.ts");
 ```
 
-**Edit a file directly in GitHub**
+You can also pass options as second argument:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```js
+const jiti = require("jiti")(__filename, { debug: true });
+```
 
-**Use GitHub Codespaces**
+### CLI
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+jiti index.ts
+# or npx jiti index.ts
+```
 
-## What technologies are used for this project?
+### Register require hook
 
-This project is built with:
+```bash
+node -r jiti/register index.ts
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Alternatively, you can register `jiti` as a require hook programmatically:
 
-## How can I deploy this project?
+```js
+const jiti = require("jiti")();
+const unregister = jiti.register();
+```
 
-Simply open [Lovable](https://lovable.dev/projects/86403247-3786-45e0-b982-a5d959c1b472) and click on Share -> Publish.
+## Options
 
-## Can I connect a custom domain to my Lovable project?
+### `debug`
 
-Yes it is!
+- Type: Boolean
+- Default: `false`
+- Environment Variable: `JITI_DEBUG`
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Enable debug to see which files are transpiled
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### `cache`
+
+- Type: Boolean | String
+- Default: `true`
+- Environment Variable: `JITI_CACHE`
+
+Use transpile cache
+
+If set to `true` will use `node_modules/.cache/jiti` (if exists) or `{TMP_DIR}/node-jiti`
+
+### `esmResolve`
+
+- Type: Boolean | String
+- Default: `false`
+- Environment Variable: `JITI_ESM_RESOLVE`
+
+Using esm resolution algorithm to support `import` condition.
+
+### `transform`
+
+- Type: Function
+- Default: Babel (lazy loaded)
+
+Transform function. See [src/babel](./src/babel.ts) for more details
+
+### `sourceMaps`
+
+- Type: Boolean
+- Default `false`
+- Environment Variable: `JITI_SOURCE_MAPS`
+
+Add inline source map to transformed source for better debugging.
+
+### `interopDefault`
+
+- Type: Boolean
+- Default: `false`
+
+Return the `.default` export of a module at the top-level.
+
+### `alias`
+
+- Type: Object
+- Default: -
+- Environment Variable: `JITI_ALIAS`
+
+Custom alias map used to resolve ids.
+
+### `nativeModules`
+
+- Type: Array
+- Default: ['typescript`]
+- Environment Variable: `JITI_NATIVE_MODULES`
+
+List of modules (within `node_modules`) to always use native require for them.
+
+### `transformModules`
+
+- Type: Array
+- Default: []
+- Environment Variable: `JITI_TRANSFORM_MODULES`
+
+List of modules (within `node_modules`) to transform them regardless of syntax.
+
+### `experimentalBun`
+
+- Type: Boolean
+- Default: Enabled if `process.versions.bun` exists (Bun runtime)
+- Environment Variable: `JITI_EXPERIMENTAL_BUN`
+
+Enable experimental native Bun support for transformations.
+
+## Development
+
+- Clone this repository
+- Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable`
+- Install dependencies using `pnpm install`
+- Run `pnpm dev`
+- Run `pnpm jiti ./test/path/to/file.ts`
+
+## License
+
+MIT. Made with 💖
+
+<!-- Badged -->
+
+[npm-version-src]: https://img.shields.io/npm/v/jiti?style=flat&colorA=18181B&colorB=F0DB4F
+[npm-version-href]: https://npmjs.com/package/jiti
+[npm-downloads-src]: https://img.shields.io/npm/dm/jiti?style=flat&colorA=18181B&colorB=F0DB4F
+[npm-downloads-href]: https://npmjs.com/package/jiti
+[bundle-src]: https://img.shields.io/bundlephobia/minzip/jiti?style=flat&colorA=18181B&colorB=F0DB4F
+[bundle-href]: https://bundlephobia.com/result?p=h3
+[license-src]: https://img.shields.io/github/license/unjs/jiti.svg?style=flat&colorA=18181B&colorB=F0DB4F
+[license-href]: https://github.com/unjs/jiti/blob/main/LICENSE
